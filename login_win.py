@@ -6,20 +6,20 @@ import main_win as mw
 
 from tkinter import *
 from PIL import Image, ImageTk
-# from tkinter import messagebox
+from tkinter import messagebox
 from datetime import date
 from email.message import EmailMessage
 from configparser import ConfigParser
 
 import global_data
 
+gdt = global_data.GDT()
+
 
 class LoginWindow:
     show_the_password = False
 
     def __init__(self):
-
-        gdt = global_data.GDT()
 
         self.width = gdt.width
         self.height = gdt.height
@@ -36,7 +36,7 @@ class LoginWindow:
         self.login_win.title("Staff Login")
         self.login_win.iconbitmap(gdt.icon)
         self.login_win.resizable(FALSE, FALSE)
-        self.login_win.configure(bg="#E2B188")
+        self.login_win.configure(bg=gdt.login_bg_col)
 
         self.img = gdt.login_bg
         self.resized_image = self.img.resize((self.width, self.height), Image.ANTIALIAS)
@@ -45,50 +45,56 @@ class LoginWindow:
         self.canvas = Canvas(self.login_win)
         self.canvas.pack(fill=BOTH, expand=1)
 
-        self.canvas.create_image(300, 200, image=self.new_image)
+        self.canvas.create_image(self.width / 2, self.height / 2, image=self.new_image)
 
         self.photo0 = ImageTk.PhotoImage(gdt.label)
-        self.img_label = Label(self.canvas, image=self.photo0, bg="#FFFFFF")
-        self.img_label.place(x=0, y=0, width=600, height=65)
+        self.img_label = Label(self.canvas, image=self.photo0, bg=gdt.label_bg_col)
+        self.img_label.place(x=0, y=0, width=self.width, height=gdt.label_height)
 
-        self.frame = Frame(self.login_win, height=200, bg="#008ae6")
-        self.frame.place(x=120, y=100, width=320, height=270)
+        self.frame = Frame(self.login_win, height=200, bg=gdt.frame_bg)
+        self.frame.place(
+            x=self.width * 0.2, y=self.height * 0.25, width=320, height=270
+        )
 
         self.imglock = ImageTk.PhotoImage(gdt.lockicon)
         self.imgforget = ImageTk.PhotoImage(gdt.frgicon)
         self.imgprofile = ImageTk.PhotoImage(gdt.proficon)
         self.imglogin = ImageTk.PhotoImage(gdt.login_bg)
         self.imgpwdhide = ImageTk.PhotoImage(gdt.hid)
-        self.imgpwdshow = ImageTk.PhotoImage(Image.open("images/pwd_show.png"))
+        self.imgpwdshow = ImageTk.PhotoImage(gdt.shw)
 
         self.labeluser = Label(
             self.frame,
             text="Email ID",
             font=("Nirmala UI", 15, "bold"),
-            fg="#333333",
-            bg="#008ae6",
+            fg=gdt.text_col,
+            bg=gdt.frame_bg,
         )
         self.labeluser.place(x=30, y=12)
         self.labeluser.config(image=self.imgprofile, compound=LEFT)
 
         self.user_entry = Entry(
-            self.frame, font=("times new roman", 15), bg="#a6a6a6", fg="grey"
+            self.frame, font=(gdt.font_family, 15), bg=gdt.log_in_bg, fg=gdt.log_in_col
         )
         self.user_entry.place(x=30, y=50, width=250)
-        self.user_entry.insert(0, "ab.cd@christuniversity.in")
+        self.user_entry.insert(0, " ")
 
         self.labelpwd = Label(
             self.frame,
             text="Password",
             font=("Nirmala UI", 15, "bold"),
-            fg="#333333",
-            bg="#008ae6",
+            fg=gdt.text_col,
+            bg=gdt.frame_bg,
         )
         self.labelpwd.place(x=30, y=80)
         self.labelpwd.config(image=self.imglock, compound=LEFT)
 
         self.password_entry = Entry(
-            self.frame, font=("times new roman", 15), bg="#a6a6a6", show="*"
+            self.frame,
+            font=(gdt.font_family, 15),
+            bg=gdt.log_in_bg,
+            fg=gdt.log_in_col,
+            show="*",
         )
         self.password_entry.place(x=30, y=120, width=250)
 
@@ -110,22 +116,22 @@ class LoginWindow:
 
         self.forget_button = Button(
             self.frame,
-            bg="#008ae6",
-            text="Forget Password?",
+            bg=gdt.frame_bg,
+            text="Forgot Password ?",
             command=lambda: self.forget_password(),
-            font=("times new roman", 13, "bold"),
-            fg="#333333",
+            font=(gdt.font_family, 13, "bold"),
+            fg=gdt.text_col,
             cursor="hand2",
             bd=0,
             activeforeground="white",
-            activebackground="#008ae6",
+            activebackground=gdt.frame_bg,
         )
         self.forget_button.place(x=30, y=230)
         self.forget_button.configure(image=self.imgforget, compound=LEFT)
 
         self.pwd_show = Button(
             self.frame,
-            bg="#008ae6",
+            bg=gdt.log_in_bg,
             command=lambda: self.show_hide_password(),
             cursor="hand2",
             bd=0,
@@ -145,7 +151,9 @@ class LoginWindow:
             bd=2,
             activebackground="yellow",
         )
-        self.add_librarian_btn.place(x=480, y=120)
+        self.add_librarian_btn.place(
+            x=self.width * 0.2 + 360, y=self.height * 0.25 + 20
+        )
 
         self.login_win.mainloop()
 
@@ -153,11 +161,11 @@ class LoginWindow:
         if self.user_entry.get() == "" or self.password_entry.get() == "":
             messagebox.showwarning(
                 "Library Management System ",
-                "Please, enter both Email ID and Password. ",
+                "Please, Enter both the Email ID and the Password ",
             )
         elif self.check_email(self.user_entry.get()) == 0:
             messagebox.showwarning(
-                "Library Management System ", "Please, enter valid Email Address."
+                "Library Management System ", "Please, Enter a valid Email Address."
             )
             self.user_entry.delete(0, END)
         else:
@@ -175,7 +183,7 @@ class LoginWindow:
             )
             self.row = cursor.fetchone()
             if self.row == None:
-                ans = messagebox.askquestion("User Not Found", "Do you want to retry?")
+                ans = messagebox.askquestion("User Not Found", "Do you want to Retry ?")
                 if ans == "yes":
                     self.user_entry.delete(0, END)
                     self.password_entry.delete(0, END)
@@ -199,11 +207,11 @@ class LoginWindow:
     def forget_password(self):
         if self.user_entry.get() == "":
             messagebox.showwarning(
-                "Library Management System ", "Please, enter the Email ID."
+                "Library Management System ", "Please, Enter your Email ID."
             )
         elif self.check_email(self.user_entry.get()) == 0:
             messagebox.showwarning(
-                "Email Not Valid", "Please enter valid email address."
+                "Invalid Email Address", "Please Enter a valid Email ID."
             )
             self.user_entry.delete(0, END)
         else:
@@ -222,7 +230,7 @@ class LoginWindow:
             self.row = cursor.fetchone()
             if self.row == None:
                 messagebox.showerror(
-                    "Error", "No staff with this Email ID is registered"
+                    "Error", "No staff with this Email ID is Registered"
                 )
             else:
                 self.send_email(self.user_entry.get(), self.row)
@@ -233,8 +241,8 @@ class LoginWindow:
 
         self.login_win.withdraw()
 
-        self.width = 600
-        self.height = 400
+        self.width = gdt.width
+        self.height = gdt.height
 
         librarian_win = Toplevel()
         self.librarian_win = librarian_win
@@ -246,8 +254,9 @@ class LoginWindow:
             f"{self.width}x{self.height}+{self.screen_width}+{self.screen_height}"
         )
         self.librarian_win.title("Add Librarian")
+        self.librarian_win.iconbitmap(gdt.icon)
         self.librarian_win.resizable(FALSE, FALSE)
-        self.librarian_win.configure(bg="#ff9900")
+        self.librarian_win.configure(bg=gdt.addlib_col)
 
         self.photo0 = ImageTk.PhotoImage(Image.open("images/christlabel.png"))
         self.top_label = Label(self.librarian_win, image=self.photo0, bg="white")
@@ -273,7 +282,7 @@ class LoginWindow:
                 text=self.input_details[i],
                 font=("Nirmala UI", 10, "bold"),
                 fg="black",
-                bg="#ff9900",
+                bg=gdt.addlib_col,
             )
             self.lblLibrarian.place(x=30 + inc_x, y=80 + inc)
 
@@ -282,40 +291,40 @@ class LoginWindow:
                 text="*",
                 font=("Nirmala UI", 10, "bold"),
                 fg="red",
-                bg="#ff9900",
+                bg=gdt.addlib_col,
             )
             self.lbl.place(x=22 + inc_x, y=80 + inc)
         inc = 0
 
         self.enteryLibrarian1 = Entry(
-            self.librarian_win, font=("times new roman", 15), bg="#F0FFFF"
+            self.librarian_win, font=(gdt.font_family, 15), bg=gdt.log_in_bg
         )
         self.enteryLibrarian1.place(x=170 + inc_x, y=80 + inc)
         inc += 40
         self.enteryLibrarian2 = Entry(
-            self.librarian_win, font=("times new roman", 15), bg="#F0FFFF"
+            self.librarian_win, font=(gdt.font_family, 15), bg=gdt.log_in_bg
         )
         self.enteryLibrarian2.place(x=170 + inc_x, y=80 + inc)
         inc += 40
         self.enteryLibrarian3 = Entry(
-            self.librarian_win, font=("times new roman", 15), bg="#F0FFFF"
+            self.librarian_win, font=(gdt.font_family, 15), bg=gdt.log_in_bg
         )
         self.enteryLibrarian3.place(x=170 + inc_x, y=80 + inc)
         inc += 40
         self.enteryLibrarian4 = Entry(
-            self.librarian_win, font=("times new roman", 15), bg="#F0FFFF"
+            self.librarian_win, font=(gdt.font_family, 15), bg=gdt.log_in_bg
         )
         self.enteryLibrarian4.place(x=170 + inc_x, y=80 + inc)
         inc += 40
 
         self.enteryLibrarian5 = Entry(
-            self.librarian_win, font=("times new roman", 15), bg="#F0FFFF"
+            self.librarian_win, font=(gdt.font_family, 15), bg=gdt.log_in_bg
         )
         self.enteryLibrarian5.place(x=170 + inc_x, y=80 + inc)
         inc += 40
 
         self.enteryLibrarian6 = Entry(
-            self.librarian_win, font=("times new roman", 15), bg="#F0FFFF"
+            self.librarian_win, font=(gdt.font_family, 15), bg=gdt.log_in_bg
         )
         self.enteryLibrarian6.place(x=170 + inc_x, y=80 + inc)
         inc += 40
@@ -324,7 +333,7 @@ class LoginWindow:
             self.librarian_win,
             width=20,
             height=1,
-            font=("times new roman", 15),
+            font=(gdt.font_family, 15),
             bg="cyan",
         )
         self.tLibrarian.place(x=170 + inc_x, y=80 + inc)
@@ -373,13 +382,7 @@ class LoginWindow:
         ):
             self.enteryLibrarian2.delete(0, END)
         else:
-            connection = psycopg2.connect(
-                user="kevin",
-                password="2048",
-                host="localhost",
-                port="5432",
-                database="libdb",
-            )
+            connection = psycopg2.connect(gdt.params)
             cursor = connection.cursor()
 
             cursor.execute(
@@ -419,7 +422,7 @@ class LoginWindow:
                 self.enteryLibrarian6.delete(0, END)
 
             else:
-                messagebox.showerror("Error", "Email id already exists.")
+                messagebox.showerror("Error", "Librarian exists with this Email ID")
 
     def show_hide_password(self):
 
@@ -437,14 +440,6 @@ class LoginWindow:
 
     def check_email(self, email_id):
 
-        """is_valid = validate_email(email_id)
-
-        if is_valid == True:
-
-            return 1
-        else:
-
-            return 0"""
         regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
         if re.match(regex, email_id):
             return 1
@@ -453,9 +448,8 @@ class LoginWindow:
 
     def send_email(self, email_add, email_pwd):
 
-        gdata = gdt.HostEmailDetails()
-        email_address = gdata.host_email_id()
-        email_password = gdata.host_email_password()
+        email_address = gdt.host_email_id()
+        email_password = gdt.host_email_password()
         send_to_address = email_add
 
         msg = EmailMessage()
@@ -463,7 +457,7 @@ class LoginWindow:
         msg["From"] = email_address
         msg["To"] = send_to_address
         msg.set_content(
-            "Dear user your password for library management software is %s" % email_pwd
+            "Dear User, your password for library management software is %s" % email_pwd
         )
         try:
             with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
@@ -473,10 +467,10 @@ class LoginWindow:
                     "Library Management System",
                     "Your password has been sent to your email id.",
                 )
-            return 1
+                return 1
         except Exception as e:
             messagebox.showerror(
                 "Library Management System",
-                """Either your email id is invalid or you are not connected to the internet.""",
+                """Couldnt Send the Email""",
             )
             return 0
