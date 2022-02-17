@@ -21,9 +21,7 @@ class GDT:
         self.hid = Image.open("images/pwd_hide.png")
 
         # colors used in the application
-        self.prog_bar = {bg = "#550A35"
-        self.prog_bar_fg = "#c55f52"
-        self.coder.color = "#"
+        self.prog_bar = {bg = "#550A35",fg = "#c55f52"}
 
 
 class HostEmailDetails:
