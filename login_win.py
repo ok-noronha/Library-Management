@@ -258,8 +258,8 @@ class LoginWindow:
         self.librarian_win.resizable(FALSE, FALSE)
         self.librarian_win.configure(bg=gdt.addlib_col)
 
-        self.photo0 = ImageTk.PhotoImage(Image.open("images/christlabel.png"))
-        self.top_label = Label(self.librarian_win, image=self.photo0, bg="white")
+        self.photo0 = ImageTk.PhotoImage(gdt.label)
+        self.top_label = Label(self.librarian_win, image=self.photo0, bg=gdt.label_bg_col)
         self.top_label.place(x=0, y=0, width=600, height=65)
 
         self.input_details = [
